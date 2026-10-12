@@ -1,0 +1,73 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Blog {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  excerpt     String?  @db.Text
+  content     String   @db.LongText
+  coverImage  String?  @db.VarChar(1000)
+  author      String   @default("Academic Yatra Team") @db.VarChar(100)
+  category    String   @default("Study Abroad") @db.VarChar(100)
+  tags        String?  @db.VarChar(255)
+  readTime    String?  @default("5 min read") @db.VarChar(50)
+  isPublished Boolean  @default(true)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([isPublished])
+}
+
+model Course {
+  id          String       @id @db.VarChar(100)
+  name        String       @db.VarChar(255)
+  category    String       @db.VarChar(100)
+  description String?      @db.Text
+  plans       CoursePlan[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([category])
+}
+
+model CoursePlan {
+  id            String   @id @default(cuid())
+  courseId      String   @db.VarChar(100)
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name          String   @db.VarChar(100)
+  price         String   @db.VarChar(50)
+  numericPrice  Float
+  originalPrice String?  @db.VarChar(50)
+  period        String?  @db.VarChar(50)
+  duration      String?  @db.VarChar(50)
+  validityText  String?  @db.VarChar(100)
+  liveHours     String?  @db.VarChar(100)
+  badge         String?  @db.VarChar(50)
+  isFeatured    Boolean  @default(false)
+  description   String?  @db.Text
+  features      String   @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String   @db.VarChar(255)
+  role         String   @default("ADMIN") @db.VarChar(50)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
