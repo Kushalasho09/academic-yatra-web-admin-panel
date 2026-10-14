@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "@/components/layout/AdminHeader";
+import RichTextEditor from "@/components/editor/RichTextEditor";
 import {
   ArrowLeft,
   Save,
@@ -11,15 +12,6 @@ import {
   Sparkles,
   CheckCircle2,
   Eye,
-  Bold,
-  Italic,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  Quote,
-  Code,
-  Link2,
   Clock,
   Tag,
   AlertCircle,
@@ -78,21 +70,6 @@ export default function CreateBlogPage() {
     }
   };
 
-  // Helper to insert markdown tags into content textarea
-  const insertMarkdown = (prefix: string, suffix: string = "") => {
-    const textarea = document.getElementById("blog-content-area") as HTMLTextAreaElement;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = content.substring(start, end) || "text";
-    const replacement = `${prefix}${selected}${suffix}`;
-    const nextContent = content.substring(0, start) + replacement + content.substring(end);
-    setContent(nextContent);
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
-    }, 0);
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,137 +243,17 @@ export default function CreateBlogPage() {
                 </div>
 
                 {activeTab === "write" ? (
-                  <div className="space-y-2">
-                    {/* Markdown Formatting Toolbar */}
-                    <div className="flex items-center gap-1 p-1.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("**", "**")}
-                        title="Bold"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Bold className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("*", "*")}
-                        title="Italic"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Italic className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="w-px h-4 bg-slate-300 mx-1" />
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("## ", "")}
-                        title="Heading 2"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Heading2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("### ", "")}
-                        title="Heading 3"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Heading3 className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="w-px h-4 bg-slate-300 mx-1" />
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("- ", "")}
-                        title="Bullet List"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <List className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("1. ", "")}
-                        title="Numbered List"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <ListOrdered className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("> ", "")}
-                        title="Blockquote"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Quote className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("```\n", "\n```")}
-                        title="Code Block"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Code className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("[Link Text](", ")")}
-                        title="Link"
-                        className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-                      >
-                        <Link2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <textarea
-                      id="blog-content-area"
-                      rows={14}
-                      required
-                      placeholder="Write your article in Markdown...&#10;&#10;## Introduction&#10;Start here with key insights...&#10;&#10;### Key Requirements&#10;- Requirement 1&#10;- Requirement 2"
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-y leading-relaxed"
-                    />
-                  </div>
+                  <RichTextEditor
+                    value={content}
+                    onChange={(html) => setContent(html)}
+                    placeholder="Write your article body here... Use H1, H2, H3 buttons, insert tables with university fees, and format links seamlessly."
+                  />
                 ) : (
-                  <div className="min-h-[350px] p-6 rounded-xl border border-slate-200 bg-slate-50/50 prose prose-slate max-w-none text-xs leading-relaxed space-y-4">
+                  <div className="min-h-[380px] p-6 rounded-2xl border border-slate-200 bg-white blog-rich-content text-sm leading-relaxed overflow-x-auto shadow-2xs">
                     {content ? (
-                      content.split("\n\n").map((block, idx) => {
-                        if (block.startsWith("## ")) {
-                          return (
-                            <h2 key={idx} className="text-base font-bold text-slate-900 border-b pb-1">
-                              {block.replace("## ", "")}
-                            </h2>
-                          );
-                        }
-                        if (block.startsWith("### ")) {
-                          return (
-                            <h3 key={idx} className="text-sm font-bold text-slate-800">
-                              {block.replace("### ", "")}
-                            </h3>
-                          );
-                        }
-                        if (block.startsWith("- ")) {
-                          return (
-                            <ul key={idx} className="list-disc pl-4 space-y-1 text-slate-700">
-                              {block.split("\n").map((line, lIdx) => (
-                                <li key={lIdx}>{line.replace("- ", "")}</li>
-                              ))}
-                            </ul>
-                          );
-                        }
-                        if (block.startsWith("> ")) {
-                          return (
-                            <blockquote key={idx} className="border-l-4 border-emerald-500 pl-3 italic text-slate-600 bg-emerald-50/50 py-1 rounded-r">
-                              {block.replace("> ", "")}
-                            </blockquote>
-                          );
-                        }
-                        return (
-                          <p key={idx} className="text-slate-700 leading-relaxed whitespace-pre-line">
-                            {block}
-                          </p>
-                        );
-                      })
+                      <div dangerouslySetInnerHTML={{ __html: content }} />
                     ) : (
-                      <p className="text-slate-400 italic">No content typed yet. Switch back to Write mode.</p>
+                      <p className="text-slate-400 italic">No content typed yet. Switch back to Write mode to craft your article.</p>
                     )}
                   </div>
                 )}
