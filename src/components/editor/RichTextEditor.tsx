@@ -42,6 +42,9 @@ import {
   X,
   ChevronDown,
   Code2,
+  UploadCloud,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -64,8 +67,15 @@ export default function RichTextEditor({
   const [linkOpenInNewTab, setLinkOpenInNewTab] = useState(true);
 
   const [showImageModal, setShowImageModal] = useState(false);
+  const [imageTab, setImageTab] = useState<"upload" | "url">("upload");
   const [imageUrl, setImageUrl] = useState("");
   const [imageAlt, setImageAlt] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const imageFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [showTableModal, setShowTableModal] = useState(false);
   const [tableRows, setTableRows] = useState(3);
@@ -232,6 +242,77 @@ export default function RichTextEditor({
     setShowLinkModal(false);
   };
 
+  const handleCloseImageModal = () => {
+    setShowImageModal(false);
+    setSelectedImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    setImageUrl("");
+    setImageAlt("");
+    setImageUploadError(null);
+    setIsUploadingImage(false);
+    setIsDragging(false);
+  };
+
+  const handleFileSelect = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setImageUploadError("Please select a valid image file (PNG, JPG, WEBP, GIF, SVG).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setImageUploadError("Image size cannot exceed 10MB limit.");
+      return;
+    }
+    setImageUploadError(null);
+    setSelectedImageFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
+    if (!imageAlt) {
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]/g, " ")
+        .trim();
+      setImageAlt(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+    }
+  };
+
+  const handleUploadAndInsert = async () => {
+    if (!selectedImageFile) return;
+    setIsUploadingImage(true);
+    setImageUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedImageFile);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      editor
+        ?.chain()
+        .focus()
+        .setImage({
+          src: data.url,
+          alt: imageAlt.trim() || selectedImageFile.name.replace(/\.[^/.]+$/, ""),
+        })
+        .run();
+
+      handleCloseImageModal();
+    } catch (err: any) {
+      setImageUploadError(err.message || "Failed to upload image. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleInsertImage = () => {
     if (!editor || !imageUrl.trim()) return;
     let url = imageUrl.trim();
@@ -239,9 +320,7 @@ export default function RichTextEditor({
       url = "https://" + url;
     }
     editor.chain().focus().setImage({ src: url, alt: imageAlt.trim() || "Article image" }).run();
-    setImageUrl("");
-    setImageAlt("");
-    setShowImageModal(false);
+    handleCloseImageModal();
   };
 
   const handleInsertTable = () => {
@@ -272,9 +351,9 @@ export default function RichTextEditor({
   const isInsideTable = editor?.isActive("table");
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden flex flex-col transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20">
-      {/* Top Toolbar */}
-      <div className="bg-slate-50/90 border-b border-slate-200 p-2 flex flex-wrap items-center gap-1 select-none sticky top-0 z-20 backdrop-blur-md">
+    <div className="w-full rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20">
+      {/* Top Toolbar - Sticky so formatting is accessible anywhere in the article */}
+      <div className="bg-white/95 border-b border-slate-200 p-2 sm:p-2.5 flex flex-wrap items-center gap-1 select-none sticky top-0 z-30 backdrop-blur-md rounded-t-2xl shadow-xs">
         
         {/* Undo / Redo */}
         <div className="flex items-center">
@@ -602,7 +681,7 @@ export default function RichTextEditor({
 
       {/* Dynamic Table Helper Bar (Active when cursor is inside any table cell) */}
       {isInsideTable && !isRawHtmlMode && (
-        <div className="bg-emerald-50/90 border-b border-emerald-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs text-emerald-950 animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="bg-emerald-50/95 border-b border-emerald-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs text-emerald-950 animate-in fade-in slide-in-from-top-1 duration-150 sticky top-[48px] sm:top-[50px] z-20 backdrop-blur-md">
           <span className="font-bold text-[11px] uppercase tracking-wider text-emerald-800 mr-1 flex items-center gap-1">
             <TableIcon className="w-3 h-3 text-emerald-600" /> Table Controls:
           </span>
@@ -864,69 +943,244 @@ export default function RichTextEditor({
         </div>
       )}
 
-      {/* Insert Image Modal */}
+      {/* Insert Image Modal (Upload from Computer or URL) */}
       {showImageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 max-w-md w-full space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 max-w-lg w-full space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-heading font-bold text-base text-slate-900 flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-emerald-600" />
                 <span>Insert Image</span>
               </h3>
               <button
                 type="button"
-                onClick={() => setShowImageModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                onClick={handleCloseImageModal}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-3 text-left">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Image URL *
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:border-emerald-500"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Alt Text / Description
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Study abroad university campus"
-                  value={imageAlt}
-                  onChange={(e) => setImageAlt(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            {/* Tab Selection */}
+            <div className="flex items-center p-1 bg-slate-100 rounded-xl">
               <button
                 type="button"
-                onClick={() => setShowImageModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold"
+                onClick={() => setImageTab("upload")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  imageTab === "upload"
+                    ? "bg-white text-emerald-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
               >
-                Cancel
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload from Computer</span>
               </button>
               <button
                 type="button"
-                onClick={handleInsertImage}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
+                onClick={() => setImageTab("url")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  imageTab === "url"
+                    ? "bg-white text-emerald-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
               >
-                Insert Image
+                <Link2 className="w-3.5 h-3.5" />
+                <span>Image Web URL</span>
               </button>
             </div>
+
+            {/* Error Message */}
+            {imageUploadError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <span>{imageUploadError}</span>
+              </div>
+            )}
+
+            {/* TAB 1: Upload from Computer */}
+            {imageTab === "upload" && (
+              <div className="space-y-4 text-left">
+                <input
+                  type="file"
+                  ref={imageFileInputRef}
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                  className="hidden"
+                />
+
+                {!imagePreview ? (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                    onClick={() => imageFileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-2xl p-7 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2.5 ${
+                      isDragging
+                        ? "border-emerald-500 bg-emerald-50/60"
+                        : "border-slate-300 hover:border-emerald-500 hover:bg-slate-50/70"
+                    }`}
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Click to browse or drag and drop image here
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Supports PNG, JPG, WEBP, GIF, SVG (up to 10MB)
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 h-44 flex items-center justify-center">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-h-full max-w-full object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => imageFileInputRef.current?.click()}
+                        className="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all backdrop-blur-xs flex items-center gap-1.5"
+                      >
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Change Image</span>
+                      </button>
+                    </div>
+
+                    {selectedImageFile && (
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                        <span className="font-mono truncate max-w-[260px]">
+                          {selectedImageFile.name}
+                        </span>
+                        <span className="font-semibold text-slate-700">
+                          {(selectedImageFile.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Alt Text / Description */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Alt Text / Image Caption (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Students attending lecture at German university"
+                    value={imageAlt}
+                    onChange={(e) => setImageAlt(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={handleCloseImageModal}
+                    disabled={isUploadingImage}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleUploadAndInsert}
+                    disabled={!selectedImageFile || isUploadingImage}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingImage ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Upload & Insert Image</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: Direct Image URL */}
+            {imageTab === "url" && (
+              <div className="space-y-3 text-left">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Image URL *
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://images.unsplash.com/..."
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Alt Text / Description
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Study abroad university campus"
+                    value={imageAlt}
+                    onChange={(e) => setImageAlt(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                </div>
+
+                {imageUrl && (
+                  <div className="mt-2 w-full h-32 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                    <img
+                      src={imageUrl}
+                      alt="Preview"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={handleCloseImageModal}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleInsertImage}
+                    disabled={!imageUrl.trim()}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs disabled:opacity-50"
+                  >
+                    Insert Image
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

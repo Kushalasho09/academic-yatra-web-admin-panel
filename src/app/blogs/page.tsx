@@ -421,27 +421,38 @@ export default function BlogsListPage() {
                       {/* Title & Cover & Slug */}
                       <td className="py-4 px-6 max-w-md">
                         <div className="flex items-start gap-3">
-                          {blog.coverImage ? (
-                            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
-                              <img
-                                src={blog.coverImage}
-                                alt={blog.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-400">
-                              <FileText className="w-5 h-5" />
-                            </div>
-                          )}
+                          {/* Clickable Thumbnail to Edit */}
+                          <Link
+                            href={`/blogs/edit/${blog.id}`}
+                            title="Click to edit article"
+                            className="shrink-0 group"
+                          >
+                            {blog.coverImage ? (
+                              <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group-hover:ring-2 group-hover:ring-emerald-500/40 transition-all">
+                                <img
+                                  src={blog.coverImage}
+                                  alt={blog.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:ring-2 group-hover:ring-emerald-500/40 transition-all">
+                                <FileText className="w-5 h-5" />
+                              </div>
+                            )}
+                          </Link>
 
                           <div className="space-y-1 min-w-0">
                             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-block">
                               {blog.category}
                             </span>
-                            <h3 className="font-semibold text-slate-900 text-sm hover:text-emerald-600 cursor-pointer transition-colors line-clamp-1">
+                            <Link
+                              href={`/blogs/edit/${blog.id}`}
+                              title="Click to edit article"
+                              className="font-semibold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-1 block"
+                            >
                               {blog.title}
-                            </h3>
+                            </Link>
                             <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
                               <span className="truncate">/{blog.slug}</span>
                               <button
@@ -515,9 +526,10 @@ export default function BlogsListPage() {
                         <Link
                           href={`/blogs/edit/${blog.id}`}
                           title="Edit article"
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 inline-block transition-colors"
+                          className="px-2.5 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/70 inline-flex items-center gap-1 text-xs font-semibold transition-colors"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Edit</span>
                         </Link>
                         <button
                           onClick={() => setDeleteTarget(blog)}
@@ -586,9 +598,13 @@ export default function BlogsListPage() {
                       <span>By {blog.author}</span>
                     </div>
 
-                    <h3 className="font-bold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-2">
+                    <Link
+                      href={`/blogs/edit/${blog.id}`}
+                      title="Click to edit article"
+                      className="font-bold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-2 block"
+                    >
                       {blog.title}
-                    </h3>
+                    </Link>
 
                     {blog.excerpt && (
                       <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
@@ -617,9 +633,10 @@ export default function BlogsListPage() {
                       <Link
                         href={`/blogs/edit/${blog.id}`}
                         title="Edit Article"
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 inline-flex items-center gap-1 transition-colors"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
+                        <span>Edit</span>
                       </Link>
                       <button
                         onClick={() => setDeleteTarget(blog)}

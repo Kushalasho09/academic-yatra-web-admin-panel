@@ -8,12 +8,14 @@ interface AdminHeaderProps {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  sticky?: boolean;
 }
 
 export default function AdminHeader({
   title,
   description,
   action,
+  sticky = true,
 }: AdminHeaderProps) {
   const [dbStatus, setDbStatus] = useState<{
     connected: boolean;
@@ -31,7 +33,7 @@ export default function AdminHeader({
   }, []);
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/90 sticky top-0 z-20 px-8 py-4 transition-all">
+    <header className={`bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 py-4 transition-all ${sticky ? "sticky top-0 z-20" : "relative z-10"}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
