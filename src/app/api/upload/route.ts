@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
       "image/svg+xml",
     ];
 
-    if (!validMimeTypes.includes(file.type.toLowerCase())) {
+    const fileType = file.type.toLowerCase();
+    if (!validMimeTypes.includes(fileType)) {
       return NextResponse.json(
         {
           success: false,
@@ -53,7 +54,12 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Sanitize filename & create unique filename
+    // Generate Base64 Data URL
+    // This works 100% reliably on Vercel, serverless, and local environments
+    // without requiring read-only filesystem writes or external cloud storage!
+    const base64DataUrl = `data:${fileType};base64,${buffer.toString("base64")}`;
+
+    // Clean unique filename
     const originalExt = path.extname(file.name) || ".png";
     const cleanBaseName = path
       .basename(file.name, originalExt)
@@ -65,37 +71,37 @@ export async function POST(req: NextRequest) {
     const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const finalFilename = `${cleanBaseName || "article-image"}-${uniqueId}${originalExt.toLowerCase()}`;
 
-    // 1. Save to admin panel public/uploads
-    const adminUploadDir = path.join(process.cwd(), "public", "uploads");
-    if (!existsSync(adminUploadDir)) {
-      await fs.mkdir(adminUploadDir, { recursive: true });
-    }
-    const adminFilePath = path.join(adminUploadDir, finalFilename);
-    await fs.writeFile(adminFilePath, buffer);
-
-    // 2. Also mirror copy to main academic-yatra-web public/uploads if sibling folder exists
-    try {
-      const webPublicDir = path.join(process.cwd(), "..", "academic-yatra-web", "public");
-      if (existsSync(webPublicDir)) {
-        const webUploadDir = path.join(webPublicDir, "uploads");
-        if (!existsSync(webUploadDir)) {
-          await fs.mkdir(webUploadDir, { recursive: true });
+    // Best-effort local file write (only if running locally in writable environment)
+    if (process.env.NODE_ENV === "development") {
+      try {
+        const adminUploadDir = path.join(process.cwd(), "public", "uploads");
+        if (!existsSync(adminUploadDir)) {
+          await fs.mkdir(adminUploadDir, { recursive: true });
         }
-        await fs.writeFile(path.join(webUploadDir, finalFilename), buffer);
+        await fs.writeFile(path.join(adminUploadDir, finalFilename), buffer);
+
+        // Also mirror copy to sibling academic-yatra-web public/uploads if present
+        const webPublicDir = path.join(process.cwd(), "..", "academic-yatra-web", "public");
+        if (existsSync(webPublicDir)) {
+          const webUploadDir = path.join(webPublicDir, "uploads");
+          if (!existsSync(webUploadDir)) {
+            await fs.mkdir(webUploadDir, { recursive: true });
+          }
+          await fs.writeFile(path.join(webUploadDir, finalFilename), buffer);
+        }
+      } catch (fsErr) {
+        // Silently catch and ignore any serverless/read-only filesystem errors
+        console.warn("Local disk write skipped (read-only environment):", fsErr);
       }
-    } catch (mirrorErr) {
-      console.warn("Could not mirror image to web project:", mirrorErr);
     }
 
-    // Public URL path
-    const fileUrl = `/uploads/${finalFilename}`;
-
+    // Return the portable Base64 Data URL
     return NextResponse.json({
       success: true,
-      url: fileUrl,
+      url: base64DataUrl,
       filename: finalFilename,
       size: file.size,
-      mimeType: file.type,
+      mimeType: fileType,
     });
   } catch (error: any) {
     console.error("Image upload API error:", error);

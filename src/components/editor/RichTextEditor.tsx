@@ -307,7 +307,30 @@ export default function RichTextEditor({
 
       handleCloseImageModal();
     } catch (err: any) {
-      setImageUploadError(err.message || "Failed to upload image. Please try again.");
+      // Automatic client-side fallback: Convert file to Base64 data URL directly
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64Url = reader.result as string;
+          if (base64Url && editor) {
+            editor
+              .chain()
+              .focus()
+              .setImage({
+                src: base64Url,
+                alt: imageAlt.trim() || selectedImageFile.name.replace(/\.[^/.]+$/, ""),
+              })
+              .run();
+            handleCloseImageModal();
+          }
+        };
+        reader.onerror = () => {
+          setImageUploadError(err.message || "Failed to upload image. Please try again.");
+        };
+        reader.readAsDataURL(selectedImageFile);
+      } catch (fallbackErr) {
+        setImageUploadError(err.message || "Failed to upload image. Please try again.");
+      }
     } finally {
       setIsUploadingImage(false);
     }

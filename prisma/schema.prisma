@@ -13,7 +13,7 @@ model Blog {
   slug        String   @unique @db.VarChar(255)
   excerpt     String?  @db.Text
   content     String   @db.LongText
-  coverImage  String?  @db.VarChar(1000)
+  coverImage  String?  @db.LongText
   author      String   @default("Academic Yatra Team") @db.VarChar(100)
   category    String   @default("Study Abroad") @db.VarChar(100)
   tags        String?  @db.VarChar(255)

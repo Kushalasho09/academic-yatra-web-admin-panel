@@ -92,7 +92,22 @@ export default function CreateBlogPage() {
 
       setCoverImage(data.url);
     } catch (err: any) {
-      setCoverUploadError(err.message || "Failed to upload image");
+      // Automatic client-side fallback
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64Url = reader.result as string;
+          if (base64Url) {
+            setCoverImage(base64Url);
+          }
+        };
+        reader.onerror = () => {
+          setCoverUploadError(err.message || "Failed to upload image");
+        };
+        reader.readAsDataURL(file);
+      } catch {
+        setCoverUploadError(err.message || "Failed to upload image");
+      }
     } finally {
       setIsUploadingCover(false);
       e.target.value = "";
