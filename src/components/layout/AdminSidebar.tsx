@@ -57,7 +57,7 @@ export default function AdminSidebar() {
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl bg-white/95 p-1 flex items-center justify-center shadow-md shadow-emerald-950/30 group-hover:scale-105 transition-transform overflow-hidden">
             <Image
-              src="/images/academic_yatra_logo.png"
+              src="/images/academic_yatra_emblem.png"
               alt="Academic Yatra"
               width={34}
               height={34}
