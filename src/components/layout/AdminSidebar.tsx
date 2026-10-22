@@ -13,6 +13,7 @@ import {
   Radio,
   ChevronRight,
   PlusCircle,
+  ShoppingBag,
 } from "lucide-react";
 
 const navigation = [
@@ -28,6 +29,13 @@ const navigation = [
     icon: FileText,
     badge: "Active",
     description: "Publish & Organize",
+  },
+  {
+    name: "Student Purchases",
+    href: "/orders",
+    icon: ShoppingBag,
+    badge: "Live",
+    description: "Orders & Enrolled Students",
   },
   {
     name: "Database Settings",
