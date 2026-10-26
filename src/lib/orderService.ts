@@ -242,6 +242,57 @@ export async function getOrders(options?: {
         environment: o.environment as any,
         hisabkitabStatus: o.hisabkitabStatus as any,
       }));
+
+      // Always merge fallback JSON orders if any missed MySQL write during connection drops
+      try {
+        const fileOrders = readOrdersFromFile();
+        const dbIdSet = new Set(orders.map((o) => o.id));
+        const missingInDb = fileOrders.filter((fo) => !dbIdSet.has(fo.id));
+        if (missingInDb.length > 0) {
+          orders = [...orders, ...missingInDb].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          // Sync missing orders into MySQL in background
+          (async () => {
+            for (const mo of missingInDb) {
+              try {
+                await prisma.order.upsert({
+                  where: { id: mo.id },
+                  update: {},
+                  create: {
+                    id: mo.id,
+                    studentName: mo.studentName,
+                    studentEmail: mo.studentEmail,
+                    studentPhone: mo.studentPhone,
+                    studentCountryCode: mo.studentCountryCode || "+91",
+                    courseId: mo.courseId,
+                    courseName: mo.courseName,
+                    planId: mo.planId,
+                    planName: mo.planName,
+                    category: mo.category,
+                    amount: Number(mo.amount),
+                    currency: mo.currency || "INR",
+                    validityText: mo.validityText,
+                    razorpayPaymentId: mo.razorpayPaymentId,
+                    razorpayOrderId: mo.razorpayOrderId,
+                    razorpaySignature: mo.razorpaySignature,
+                    paymentStatus: mo.paymentStatus || "SUCCESS",
+                    environment: mo.environment || "TEST",
+                    failureReason: mo.failureReason,
+                    hisabkitabStatus: mo.hisabkitabStatus || "SYNCED",
+                    hisabkitabInvoiceId: mo.hisabkitabInvoiceId,
+                    hisabkitabReceiptId: mo.hisabkitabReceiptId,
+                    notes: mo.notes,
+                    createdAt: new Date(mo.createdAt),
+                  },
+                });
+              } catch (_) {}
+            }
+          })();
+        }
+      } catch (fErr) {
+        console.warn("JSON fallback merge notice:", fErr);
+      }
     } catch (err) {
       console.error("MySQL query failed, falling back to JSON:", err);
       orders = readOrdersFromFile();
