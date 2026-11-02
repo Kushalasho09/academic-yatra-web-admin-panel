@@ -18,6 +18,7 @@ import {
   AlertCircle,
   RefreshCw,
   FolderOpen,
+  Tag,
 } from "lucide-react";
 import { BlogPost } from "@/lib/blogService";
 
@@ -380,6 +381,52 @@ export default function DashboardPage() {
                   Zero downtime. Articles work with or without active MySQL.
                 </p>
               </div>
+            </div>
+
+            {/* Packages & Pricing Hub */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <Tag className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      Course Packages
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      17 Courses • 37 Active Plans
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Interactive
+                </span>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-2">
+                <div className="flex justify-between text-slate-600 text-[11px]">
+                  <span>Language Prep:</span>
+                  <span className="font-semibold text-slate-800">9 Courses (₹8.9k - ₹59.9k)</span>
+                </div>
+                <div className="flex justify-between text-slate-600 text-[11px]">
+                  <span>Test Prep:</span>
+                  <span className="font-semibold text-slate-800">5 Courses (₹14.9k - ₹45.9k)</span>
+                </div>
+                <div className="flex justify-between text-slate-600 text-[11px]">
+                  <span>Skill Catalyst:</span>
+                  <span className="font-semibold text-slate-800">4 Courses (₹4.9k - ₹14.9k)</span>
+                </div>
+              </div>
+
+              <Link
+                href="/packages"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors"
+              >
+                <Tag className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Manage Packages & Pricing</span>
+              </Link>
             </div>
 
             {/* Category Distribution */}

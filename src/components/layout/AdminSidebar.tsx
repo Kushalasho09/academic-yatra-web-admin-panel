@@ -14,6 +14,7 @@ import {
   ChevronRight,
   PlusCircle,
   ShoppingBag,
+  Tag,
 } from "lucide-react";
 
 const navigation = [
@@ -22,6 +23,13 @@ const navigation = [
     href: "/",
     icon: LayoutDashboard,
     description: "Overview & Analytics",
+  },
+  {
+    name: "Packages & Pricing",
+    href: "/packages",
+    icon: Tag,
+    badge: "17 Courses",
+    description: "Course Plans & Fees",
   },
   {
     name: "Blog Articles",
