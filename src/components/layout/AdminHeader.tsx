@@ -33,25 +33,25 @@ export default function AdminHeader({
   }, []);
 
   return (
-    <header className={`bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 py-4 transition-all ${sticky ? "sticky top-0 z-20" : "relative z-10"}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+    <header className={`bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-6 sm:px-8 py-3.5 sm:py-4 transition-all ${sticky ? "sticky top-0 z-20" : "relative z-10"}`}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-snug">
             {title}
           </h1>
           {description && (
-            <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+            <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{description}</p>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
           {action}
 
           {/* Database indicator pill */}
           <Link
             href="/settings"
             title="Click to view database settings"
-            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors shrink-0 whitespace-nowrap ${
               dbStatus.loading
                 ? "bg-slate-50 border-slate-200 text-slate-500"
                 : dbStatus.connected
@@ -60,7 +60,7 @@ export default function AdminHeader({
             }`}
           >
             <span
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 rounded-full shrink-0 ${
                 dbStatus.loading
                   ? "bg-slate-400"
                   : dbStatus.connected
@@ -69,29 +69,29 @@ export default function AdminHeader({
               }`}
             />
             <Database
-              className={`w-3.5 h-3.5 ${
+              className={`w-3.5 h-3.5 shrink-0 ${
                 dbStatus.connected ? "text-emerald-600" : "text-amber-600"
               }`}
             />
-            <span>
+            <span className="whitespace-nowrap">
               {dbStatus.loading
                 ? "Checking DB..."
                 : dbStatus.connected
                 ? "MySQL Connected"
-                : "DB Offline (Local Store)"}
+                : "DB Offline"}
             </span>
           </Link>
 
           {/* Admin Avatar */}
-          <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-emerald-500/20">
+          <div className="flex items-center gap-2.5 pl-2.5 sm:pl-3 border-l border-slate-200 shrink-0 whitespace-nowrap">
+            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-emerald-500/20 shrink-0">
               AY
             </div>
             <div className="hidden lg:block text-left">
-              <span className="text-xs font-semibold text-slate-800 block leading-tight">
+              <span className="text-xs font-semibold text-slate-800 block leading-tight whitespace-nowrap">
                 Academic Yatra
               </span>
-              <span className="text-[10px] text-slate-500 block">
+              <span className="text-[10px] text-slate-500 block whitespace-nowrap">
                 Admin Panel
               </span>
             </div>

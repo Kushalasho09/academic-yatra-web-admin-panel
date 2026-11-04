@@ -28,7 +28,7 @@ const navigation = [
     name: "Packages & Pricing",
     href: "/packages",
     icon: Tag,
-    badge: "17 Courses",
+    badge: "16 Courses",
     description: "Course Plans & Fees",
   },
   {
@@ -67,7 +67,7 @@ export default function AdminSidebar() {
   }, []);
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800/80 flex flex-col shrink-0 h-screen sticky top-0 text-slate-300 z-30 select-none">
+    <aside className="w-72 bg-slate-900 border-r border-slate-800/80 flex flex-col shrink-0 h-screen sticky top-0 text-slate-300 z-30 select-none">
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800/70">
         <Link href="/" className="flex items-center gap-3 group">
@@ -108,27 +108,27 @@ export default function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+              className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                 isActive
                   ? "bg-emerald-600 text-white shadow-lg shadow-emerald-950/40 font-semibold"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/70"
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <item.icon
-                  className={`w-4 h-4 transition-colors ${
+                  className={`w-4 h-4 shrink-0 transition-colors ${
                     isActive
                       ? "text-white"
                       : "text-slate-400 group-hover:text-emerald-400"
                   }`}
                 />
-                <span>{item.name}</span>
+                <span className="whitespace-nowrap">{item.name}</span>
               </div>
               {item.badge && (
                 <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full shrink-0 whitespace-nowrap self-center ${
                     isActive
-                      ? "bg-emerald-700 text-emerald-100"
+                      ? "bg-emerald-700/90 text-emerald-100"
                       : "bg-slate-800 text-emerald-400 border border-slate-700/60"
                   }`}
                 >
