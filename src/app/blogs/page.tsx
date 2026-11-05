@@ -26,6 +26,12 @@ import {
   Check,
   AlertTriangle,
   X,
+  CheckCircle2,
+  Tag,
+  User,
+  ArrowUpRight,
+  BookOpen,
+  ChevronDown,
 } from "lucide-react";
 
 export default function BlogsListPage() {
@@ -153,22 +159,24 @@ export default function BlogsListPage() {
   const totalViews = blogs.reduce((acc, b) => acc + (b.views || 0), 0);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen text-slate-900">
       <AdminHeader
         title="Blog Articles Management"
         description="Publish, organize, filter, and schedule articles for students and learners"
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={fetchBlogs}
-              title="Refresh list"
-              className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+              disabled={loading}
+              title="Refresh articles"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-60"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-emerald-600" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
             </button>
             <Link
               href="/blogs/new"
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs shadow-emerald-950/15 transition-all hover:shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Write New Blog</span>
@@ -177,155 +185,194 @@ export default function BlogsListPage() {
         }
       />
 
-      <main className="p-8 max-w-7xl mx-auto w-full space-y-6 flex-1">
-        {/* Top Summary Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Total Blogs
+      <main className="p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 flex-1">
+        {/* Metric Cards Row - High Craft Unslop Architecture */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {/* Card 1: Total Blogs */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Total Articles
               </span>
-              <h4 className="text-xl font-extrabold text-slate-900 mt-0.5">
-                {totalCount}
-              </h4>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <FileText className="w-4 h-4" />
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-              <FileText className="w-4 h-4" />
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
+                {totalCount}
+              </h3>
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Across {categories.length} topics
+              </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          {/* Card 2: Published Live */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Published Live
               </span>
-              <h4 className="text-xl font-extrabold text-emerald-600 mt-0.5">
-                {publishedCount}
-              </h4>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle className="w-4 h-4" />
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-emerald-600 tracking-tight font-heading">
+                {publishedCount}
+              </h3>
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Live on academicyatra.com/blogs
+              </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          {/* Card 3: Drafts in Review */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Drafts in Review
               </span>
-              <h4 className="text-xl font-extrabold text-amber-600 mt-0.5">
-                {draftCount}
-              </h4>
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                <Clock className="w-4 h-4" />
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">
+                {draftCount}
+              </h3>
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                Unpublished editorial drafts
+              </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Total Views
+          {/* Card 4: Total Views */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Total Article Views
               </span>
-              <h4 className="text-xl font-extrabold text-slate-900 mt-0.5">
-                {totalViews.toLocaleString()}
-              </h4>
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Eye className="w-4 h-4" />
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Eye className="w-4 h-4" />
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
+                {totalViews.toLocaleString()}
+              </h3>
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
+                Cumulative reader impressions
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Filter & Controls Card */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Filter and Search Bar Row */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <div className="relative flex-1 max-w-xl">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search by title, topic, author, tags, or slug..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50/50 hover:bg-white transition-colors"
+                className="w-full pl-9 pr-8 h-10 bg-slate-50/70 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
               />
               {search && (
                 <button
+                  type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            {/* Status Pills */}
-            <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
-              <button
-                onClick={() => setSelectedStatus("ALL")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  selectedStatus === "ALL"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                All ({totalCount})
-              </button>
-              <button
-                onClick={() => setSelectedStatus("PUBLISHED")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  selectedStatus === "PUBLISHED"
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Published ({publishedCount})
-              </button>
-              <button
-                onClick={() => setSelectedStatus("DRAFT")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  selectedStatus === "DRAFT"
-                    ? "bg-amber-600 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Drafts ({draftCount})
-              </button>
-            </div>
-
-            {/* Layout switch & Sort */}
-            <div className="flex items-center gap-3">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              >
-                <option value="newest">Newest First</option>
-                <option value="views">Most Views</option>
-                <option value="title">Title (A-Z)</option>
-              </select>
-
-              <div className="flex items-center border border-slate-200 rounded-xl p-0.5 bg-slate-50">
+            {/* Controls: Status, Sort & Layout Switcher - 100% Pixel Aligned */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Status Pills */}
+              <div className="h-10 flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
                 <button
-                  onClick={() => setViewMode("table")}
-                  title="Table view"
-                  className={`p-1.5 rounded-lg transition-colors ${
-                    viewMode === "table"
-                      ? "bg-white text-emerald-600 shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
+                  type="button"
+                  onClick={() => setSelectedStatus("ALL")}
+                  className={`h-full px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center ${
+                    selectedStatus === "ALL"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
+                >
+                  All ({totalCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStatus("PUBLISHED")}
+                  className={`h-full px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center ${
+                    selectedStatus === "PUBLISHED"
+                      ? "bg-white text-emerald-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Published ({publishedCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStatus("DRAFT")}
+                  className={`h-full px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center ${
+                    selectedStatus === "DRAFT"
+                      ? "bg-white text-amber-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Drafts ({draftCount})
+                </button>
+              </div>
+
+              {/* Sort Dropdown - Exact Aligned */}
+              <div className="relative h-10 flex items-center">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="appearance-none h-full pl-3 pr-8 bg-white border border-slate-200/90 rounded-xl text-xs font-semibold text-slate-700 hover:border-slate-300 focus:outline-none focus:border-emerald-500 cursor-pointer shadow-xs"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="views">Most Viewed</option>
+                  <option value="title">Alphabetical</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* Layout Switcher - Exact Aligned */}
+              <div className="h-10 flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("table")}
+                  className={`h-full px-2.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
+                    viewMode === "table"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                  title="Table view"
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setViewMode("grid")}
-                  title="Grid view"
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`h-full px-2.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                     viewMode === "grid"
-                      ? "bg-white text-emerald-600 shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-900"
                   }`}
+                  title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -333,17 +380,15 @@ export default function BlogsListPage() {
             </div>
           </div>
 
-          {/* Category Filter Chips */}
-          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
-            <span className="text-xs text-slate-400 font-medium flex items-center gap-1 mr-1">
-              <Filter className="w-3 h-3" /> Topic:
-            </span>
+          {/* Topics Category Navigation Pills */}
+          <div className="flex items-center gap-1.5 pt-3 border-t border-slate-100 overflow-x-auto pb-1 sm:pb-0">
+            <span className="text-[11px] font-semibold text-slate-400 mr-1 uppercase">Topic:</span>
             <button
               onClick={() => setSelectedCategory("ALL")}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
                 selectedCategory === "ALL"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
               }`}
             >
               All Topics
@@ -352,10 +397,10 @@ export default function BlogsListPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                  selectedCategory === cat
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                  selectedCategory.toLowerCase() === cat.toLowerCase()
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
                 }`}
               >
                 {cat}
@@ -364,101 +409,85 @@ export default function BlogsListPage() {
           </div>
         </div>
 
-        {/* Content: Table or Grid */}
+        {/* Loading and Empty States */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-16 text-center text-slate-400 text-xs shadow-sm">
-            Loading articles...
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-16 text-center text-slate-400">
+            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
+            <p className="text-xs font-medium">Loading published articles...</p>
           </div>
         ) : filteredBlogs.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-16 text-center shadow-sm space-y-3">
-            <FileText className="w-10 h-10 text-slate-300 mx-auto" />
-            <h3 className="text-sm font-bold text-slate-700">
-              No matching articles found
-            </h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No blogs match your search or category filter. Try clearing filters or create a new blog post.
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-16 text-center text-slate-400">
+            <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+            <p className="text-sm font-semibold text-slate-700">No articles match criteria</p>
+            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+              Try adjusting your search query, topic filter, or publish status.
             </p>
-            <div className="pt-2">
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setSelectedCategory("ALL");
-                  setSelectedStatus("ALL");
-                }}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors mr-2"
-              >
-                Clear Filters
-              </button>
-              <Link
-                href="/blogs/new"
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
-              >
-                Write New Blog
-              </Link>
-            </div>
+            <button
+              onClick={() => {
+                setSearch("");
+                setSelectedCategory("ALL");
+                setSelectedStatus("ALL");
+              }}
+              className="mt-3 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold"
+            >
+              Reset Filters
+            </button>
           </div>
         ) : viewMode === "table" ? (
-          /* Table View */
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          /* TABLE VIEW - High Craft Unslop Architecture */
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="py-3.5 px-6">Article & Topic</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3.5 px-4 sm:px-6">Article &amp; Topic</th>
                     <th className="py-3.5 px-4">Author</th>
                     <th className="py-3.5 px-4">Read Time</th>
                     <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4 text-center">Reader Views</th>
-                    <th className="py-3.5 px-6 text-right">Actions</th>
+                    <th className="py-3.5 px-4">Reader Views</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-xs text-slate-600">
+                <tbody className="divide-y divide-slate-100 text-xs">
                   {filteredBlogs.map((blog) => (
                     <tr
                       key={blog.id}
-                      className="hover:bg-slate-50/60 transition-colors group"
+                      className="hover:bg-slate-50/80 transition-colors group"
                     >
-                      {/* Title & Cover & Slug */}
-                      <td className="py-4 px-6 max-w-md">
+                      {/* Article & Topic */}
+                      <td className="py-3.5 px-4 sm:px-6">
                         <div className="flex items-start gap-3">
-                          {/* Clickable Thumbnail to Edit */}
-                          <Link
-                            href={`/blogs/edit/${blog.id}`}
-                            title="Click to edit article"
-                            className="shrink-0 group"
-                          >
-                            {blog.coverImage ? (
-                              <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group-hover:ring-2 group-hover:ring-emerald-500/40 transition-all">
-                                <img
-                                  src={blog.coverImage}
-                                  alt={blog.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:ring-2 group-hover:ring-emerald-500/40 transition-all">
-                                <FileText className="w-5 h-5" />
-                              </div>
-                            )}
-                          </Link>
+                          {blog.coverImage ? (
+                            <img
+                              src={blog.coverImage}
+                              alt={blog.title}
+                              className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 mt-0.5"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-400 shrink-0 mt-0.5">
+                              <BookOpen className="w-5 h-5 text-slate-400" />
+                            </div>
+                          )}
 
-                          <div className="space-y-1 min-w-0">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-block">
+                          <div className="min-w-0 flex-1">
+                            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 mb-1">
                               {blog.category}
                             </span>
                             <Link
                               href={`/blogs/edit/${blog.id}`}
-                              title="Click to edit article"
-                              className="font-semibold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-1 block"
+                              className="font-bold text-slate-900 block hover:text-emerald-600 transition-colors line-clamp-1"
                             >
                               {blog.title}
                             </Link>
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
-                              <span className="truncate">/{blog.slug}</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[11px] font-mono text-slate-400 truncate max-w-[200px]" title={blog.slug}>
+                                /{blog.slug}
+                              </span>
                               <button
+                                type="button"
                                 onClick={() => copySlug(blog.slug)}
-                                title="Copy public link"
-                                className="text-slate-400 hover:text-slate-600 transition-colors"
+                                className="text-slate-400 hover:text-slate-700 p-0.5 rounded cursor-pointer"
+                                title="Copy public URL"
                               >
                                 {copiedSlug === blog.slug ? (
                                   <Check className="w-3 h-3 text-emerald-600" />
@@ -472,72 +501,74 @@ export default function BlogsListPage() {
                       </td>
 
                       {/* Author */}
-                      <td className="py-4 px-4 font-medium text-slate-700">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-700 font-medium">
                         {blog.author}
                       </td>
 
                       {/* Read Time */}
-                      <td className="py-4 px-4 text-slate-500">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 font-medium">
                         <span className="inline-flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>{blog.readTime || "5 min read"}</span>
                         </span>
                       </td>
 
-                      {/* Status Toggle Button */}
-                      <td className="py-4 px-4">
+                      {/* Status */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <button
+                          type="button"
                           onClick={() => handleTogglePublish(blog.id, blog.isPublished)}
                           title="Click to toggle publish status"
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all border ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
                             blog.isPublished
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                              : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100"
+                              : "bg-amber-50 text-amber-700 border-amber-200/80 hover:bg-amber-100"
                           }`}
                         >
-                          {blog.isPublished ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 text-emerald-600" /> Published
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="w-3 h-3 text-slate-400" /> Draft
-                            </>
-                          )}
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              blog.isPublished ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          />
+                          <span>{blog.isPublished ? "Published" : "Draft"}</span>
                         </button>
                       </td>
 
-                      {/* Views */}
-                      <td className="py-4 px-4 text-center font-bold text-slate-800">
+                      {/* Reader Views */}
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-800 font-bold">
                         {blog.views.toLocaleString()}
                       </td>
 
                       {/* Actions */}
-                      <td className="py-4 px-6 text-right space-x-1.5">
-                        <a
-                          href={`http://localhost:3000/blogs/${blog.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="Preview on live site"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 inline-block transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                        <Link
-                          href={`/blogs/edit/${blog.id}`}
-                          title="Edit article"
-                          className="px-2.5 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/70 inline-flex items-center gap-1 text-xs font-semibold transition-colors"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          <span>Edit</span>
-                        </Link>
-                        <button
-                          onClick={() => setDeleteTarget(blog)}
-                          title="Delete article"
-                          className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 inline-block transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <a
+                            href={`http://localhost:3000/blogs/${blog.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all cursor-pointer"
+                            title="Preview on live site"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+
+                          <Link
+                            href={`/blogs/edit/${blog.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                          >
+                            <Edit className="w-3 h-3 text-slate-500" />
+                            <span>Edit</span>
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(blog)}
+                            className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50 transition-all cursor-pointer"
+                            title="Delete article"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -546,62 +577,62 @@ export default function BlogsListPage() {
             </div>
           </div>
         ) : (
-          /* Grid View */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          /* GRID VIEW - High Craft Unslop Architecture */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredBlogs.map((blog) => (
               <div
                 key={blog.id}
-                className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow group"
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all overflow-hidden flex flex-col justify-between"
               >
-                {/* Cover Image */}
-                <div className="h-44 w-full bg-slate-100 relative overflow-hidden">
+                {/* Image Cover */}
+                <div className="relative h-44 bg-slate-100 w-full overflow-hidden">
                   {blog.coverImage ? (
                     <img
                       src={blog.coverImage}
                       alt={blog.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                      <FileText className="w-12 h-12" />
+                    <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                      <BookOpen className="w-10 h-10 text-slate-300" />
                     </div>
                   )}
 
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/95 text-slate-900 shadow-sm backdrop-blur-sm uppercase tracking-wider">
+                  {/* Top Status & Category Badges */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/95 text-slate-800 shadow-xs border border-white/80 backdrop-blur-xs">
                       {blog.category}
                     </span>
-                  </div>
-
-                  <div className="absolute top-3 right-3">
                     <button
+                      type="button"
                       onClick={() => handleTogglePublish(blog.id, blog.isPublished)}
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm backdrop-blur-sm transition-all ${
+                      className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs border backdrop-blur-xs cursor-pointer ${
                         blog.isPublished
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-800/90 text-slate-200"
+                          ? "bg-emerald-500/95 text-white border-emerald-400"
+                          : "bg-slate-900/90 text-white border-slate-800"
                       }`}
                     >
-                      {blog.isPublished ? "Live" : "Draft"}
+                      <span className={`w-1.5 h-1.5 rounded-full ${blog.isPublished ? "bg-white" : "bg-amber-400"}`} />
+                      <span>{blog.isPublished ? "Live" : "Draft"}</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Card Body */}
+                {/* Card Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {blog.readTime || "5 min read"}
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{blog.readTime || "5 min read"}</span>
                       </span>
-                      <span>&bull;</span>
+                      <span>•</span>
                       <span>By {blog.author}</span>
                     </div>
 
                     <Link
                       href={`/blogs/edit/${blog.id}`}
-                      title="Click to edit article"
-                      className="font-bold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-2 block"
+                      className="font-bold text-slate-900 text-sm hover:text-emerald-600 transition-colors line-clamp-2 block leading-snug"
                     >
                       {blog.title}
                     </Link>
@@ -613,11 +644,11 @@ export default function BlogsListPage() {
                     )}
                   </div>
 
-                  {/* Card Footer */}
+                  {/* Card Footer Actions */}
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1 font-mono">
                       <Eye className="w-3.5 h-3.5 text-slate-400" />
-                      {blog.views} reads
+                      <span>{blog.views} views</span>
                     </span>
 
                     <div className="flex items-center gap-1">
@@ -625,25 +656,25 @@ export default function BlogsListPage() {
                         href={`http://localhost:3000/blogs/${blog.slug}`}
                         target="_blank"
                         rel="noreferrer"
+                        className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/50 transition-colors"
                         title="View Live"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                       <Link
                         href={`/blogs/edit/${blog.id}`}
-                        title="Edit Article"
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 inline-flex items-center gap-1 transition-colors"
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors inline-flex items-center gap-1"
                       >
-                        <Edit className="w-3.5 h-3.5" />
+                        <Edit className="w-3 h-3 text-slate-500" />
                         <span>Edit</span>
                       </Link>
                       <button
+                        type="button"
                         onClick={() => setDeleteTarget(blog)}
+                        className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                         title="Delete Article"
-                        className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -656,9 +687,9 @@ export default function BlogsListPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
@@ -673,16 +704,18 @@ export default function BlogsListPage() {
 
             <div className="flex items-center justify-end gap-2.5 pt-2">
               <button
+                type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-colors"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? "Deleting..." : "Yes, Delete Article"}
               </button>

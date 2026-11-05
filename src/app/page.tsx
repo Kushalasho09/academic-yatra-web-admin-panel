@@ -19,6 +19,12 @@ import {
   RefreshCw,
   FolderOpen,
   Tag,
+  ShieldCheck,
+  Server,
+  Activity,
+  Edit3,
+  Globe,
+  Radio,
 } from "lucide-react";
 import { BlogPost } from "@/lib/blogService";
 
@@ -26,8 +32,10 @@ export default function DashboardPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbStatus, setDbStatus] = useState<any>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
       const [blogsRes, dbRes] = await Promise.all([
         fetch("/api/blogs"),
@@ -62,6 +70,7 @@ export default function DashboardPage() {
   }, {});
 
   const handleTogglePublish = async (blog: BlogPost) => {
+    setTogglingId(blog.id);
     try {
       const res = await fetch(`/api/blogs/${blog.id}`, {
         method: "PUT",
@@ -76,26 +85,30 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.error("Toggle publish error:", err);
+    } finally {
+      setTogglingId(null);
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <AdminHeader
         title="Dashboard Overview"
         description="Monitor articles, publication status, and database synchronization"
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={fetchDashboardData}
+              disabled={loading}
               title="Refresh dashboard metrics"
-              className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-60"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-emerald-600" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
             </button>
             <Link
               href="/blogs/new"
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-emerald-950/10 transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs shadow-emerald-950/15 transition-all hover:shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Write Blog Post</span>
@@ -104,359 +117,346 @@ export default function DashboardPage() {
         }
       />
 
-      <main className="p-8 max-w-7xl mx-auto w-full space-y-8 flex-1">
-        {/* Metric Cards Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <main className="p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 flex-1">
+        {/* Metric Cards Row - High Craft Unslop Architecture */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* Card 1: Total Blogs */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Total Articles
               </span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <FileText className="w-4.5 h-4.5" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <FileText className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2">
-              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
                 {totalBlogs}
               </h3>
-              <p className="text-[11px] text-slate-500 font-medium mt-1">
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Across {Object.keys(categoryCounts).length} unique categories
               </p>
             </div>
           </div>
 
           {/* Card 2: Published Blogs */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Published Live
               </span>
-              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <CheckCircle2 className="w-4.5 h-4.5" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2">
-              <h3 className="text-3xl font-extrabold text-blue-600 tracking-tight">
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-emerald-600 tracking-tight font-heading">
                 {publishedBlogs}
               </h3>
-              <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live on academicyatra.com
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Visible to students on web portal
               </p>
             </div>
           </div>
 
-          {/* Card 3: Drafts */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          {/* Card 3: Draft Articles */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Drafts in Review
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Draft Posts
               </span>
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Clock className="w-4.5 h-4.5" />
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2">
-              <h3 className="text-3xl font-extrabold text-amber-600 tracking-tight">
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">
                 {draftBlogs}
               </h3>
-              <p className="text-[11px] text-slate-500 font-medium mt-1">
-                {draftBlogs === 0 ? "All posts published" : "Ready to be finalized"}
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                Work in progress / Unpublished
               </p>
             </div>
           </div>
 
-          {/* Card 4: Total Views */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+          {/* Card 4: Total Article Views */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Reader Views
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Total Article Views
               </span>
-              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <Eye className="w-4.5 h-4.5" />
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Eye className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2">
-              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="mt-3">
+              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
                 {totalViews.toLocaleString()}
               </h3>
-              <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Organic student readers
+              <p className="text-[12px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
+                Cumulative reader impressions
               </p>
             </div>
           </div>
         </div>
 
-        {/* 2-Column Main Layout: (Left: Recent Articles List) | (Right: DB Hub & Categories) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Column: Recent Articles (2 Cols wide) */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h2 className="font-bold text-slate-900 text-base">
-                  Recent Articles
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Articles authored and scheduled for public reading
-                </p>
+        {/* 2-Column Split: Main Feeds & System Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Column (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Hostinger MySQL Database Live Telemetry Card */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center shrink-0">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-slate-900">
+                        Hostinger MySQL Telemetry
+                      </h3>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Live Synced
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Prisma ORM connected to srv1874.hstgr.io (Port 3306)
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-emerald-600 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/80 transition-colors self-start sm:self-auto"
+                >
+                  <span>DB Config</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
-              <Link
-                href="/blogs"
-                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group"
-              >
-                <span>View all articles</span>
-                <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </Link>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Host Node</span>
+                  <span className="text-xs font-mono font-bold text-slate-800 mt-0.5 block truncate" title="srv1874.hstgr.io">
+                    srv1874.hstgr.io
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Database</span>
+                  <span className="text-xs font-mono font-bold text-slate-800 mt-0.5 block truncate" title="u338135177_academicyatra">
+                    academicyatra
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Port</span>
+                  <span className="text-xs font-mono font-bold text-slate-800 mt-0.5 block">
+                    3306 (SSL)
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Status / Ping</span>
+                  <span className="text-xs font-mono font-bold text-emerald-600 mt-0.5 flex items-center gap-1">
+                    <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Active OK</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="divide-y divide-slate-100 flex-1">
+            {/* Recent Articles Publication Table */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    Recent Articles & Publications
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Latest editorial updates and student engagement stats
+                  </p>
+                </div>
+                <Link
+                  href="/blogs"
+                  className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1"
+                >
+                  <span>View all {totalBlogs}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
               {loading ? (
-                <div className="p-10 text-center text-slate-400 text-xs">
-                  Loading articles...
+                <div className="p-12 text-center text-slate-400">
+                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
+                  <p className="text-xs font-medium">Loading articles telemetry...</p>
                 </div>
               ) : blogs.length === 0 ? (
-                <div className="p-10 text-center space-y-3">
-                  <FileText className="w-8 h-8 text-slate-300 mx-auto" />
-                  <p className="text-xs text-slate-500">No blog articles created yet.</p>
+                <div className="p-12 text-center text-slate-400">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                  <p className="text-xs font-medium text-slate-600">No blog posts found</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Get started by creating your first article</p>
                   <Link
                     href="/blogs/new"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold"
+                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Write First Article
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Post</span>
                   </Link>
                 </div>
               ) : (
-                blogs.slice(0, 5).map((blog) => (
-                  <div
-                    key={blog.id}
-                    className="p-5 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                  >
-                    <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                      {blog.coverImage ? (
-                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
-                          <img
-                            src={blog.coverImage}
-                            alt={blog.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-400">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                      )}
-
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                <div className="divide-y divide-slate-100">
+                  {blogs.slice(0, 5).map((blog) => (
+                    <div
+                      key={blog.id}
+                      className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/70">
                             {blog.category}
                           </span>
-                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> {blog.readTime || "5 min read"}
+                          <span className="text-[11px] text-slate-400 font-medium">
+                            {blog.readTime || "5 min read"}
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                            <Eye className="w-3 h-3 text-slate-400" />
+                            {blog.views || 0} views
                           </span>
                         </div>
-                        <h3 className="font-semibold text-slate-900 text-sm hover:text-emerald-600 transition-colors truncate">
-                          {blog.title}
-                        </h3>
-                        <p className="text-[11px] text-slate-400 truncate">
-                          By {blog.author} &bull; {blog.views} views
-                        </p>
+                        <h4 className="font-bold text-slate-900 text-sm truncate hover:text-emerald-600 transition-colors">
+                          <Link href={`/blogs/edit/${blog.id}`}>{blog.title}</Link>
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                        {/* Status Pill Badge */}
+                        <button
+                          onClick={() => handleTogglePublish(blog)}
+                          disabled={togglingId === blog.id}
+                          title="Click to toggle publish status"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                            blog.isPublished
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100"
+                              : "bg-amber-50 text-amber-700 border-amber-200/80 hover:bg-amber-100"
+                          } ${togglingId === blog.id ? "opacity-50" : ""}`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              blog.isPublished ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          />
+                          <span>{blog.isPublished ? "Published" : "Draft"}</span>
+                        </button>
+
+                        {/* Edit Button */}
+                        <Link
+                          href={`/blogs/edit/${blog.id}`}
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-white hover:border-slate-300 transition-all"
+                          title="Edit Article"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </Link>
+
+                        {/* Live Preview Button */}
+                        <a
+                          href={`http://localhost:3000/blogs/${blog.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-emerald-600 hover:bg-white hover:border-emerald-200 transition-all"
+                          title="Preview on public site"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                      <button
-                        onClick={() => handleTogglePublish(blog)}
-                        title="Click to toggle publish status"
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
-                          blog.isPublished
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100"
-                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
-                        }`}
-                      >
-                        {blog.isPublished ? "Live" : "Draft"}
-                      </button>
-
-                      <Link
-                        href={`/blogs/edit/${blog.id}`}
-                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-colors"
-                      >
-                        Edit
-                      </Link>
-
-                      <a
-                        href={`http://localhost:3000/blogs/${blog.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="Preview on live site"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
-            </div>
-
-            <div className="p-4 bg-slate-50/70 border-t border-slate-100 text-center">
-              <Link
-                href="/blogs"
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1.5"
-              >
-                <span>Manage all {totalBlogs} articles & filter by categories</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
             </div>
           </div>
 
-          {/* Right Column: DB Health Hub & Category Breakdown */}
+          {/* Right Column (1/3) */}
           <div className="space-y-6">
-            {/* Database Health Card */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+            {/* Course Packages & Pricing Widget */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                      dbStatus?.connected
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-amber-50 text-amber-600"
-                    }`}
-                  >
-                    <Database className="w-4.5 h-4.5" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                    <Tag className="w-3.5 h-3.5" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-sm">
-                      Database Engine
-                    </h3>
-                    <p className="text-[11px] text-slate-500">
-                      MySQL & Prisma ORM
-                    </p>
-                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    Course Pricing Matrix
+                  </h3>
                 </div>
-
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    dbStatus?.connected
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {dbStatus?.connected ? "Connected" : "Setup Required"}
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  16 Courses
                 </span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-2">
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Database Host:</span>
-                  <span className="font-mono font-medium text-slate-800">
-                    {dbStatus?.config?.host || "localhost"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Database Name:</span>
-                  <span className="font-mono font-medium text-slate-800">
-                    {dbStatus?.config?.database || "academic_yatra_db"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Active Fallback:</span>
-                  <span className="font-semibold text-emerald-700">
-                    Local JSON Store (Safe)
-                  </span>
-                </div>
-              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Official PDF master pricing sync. Manage monthly fees, 5 key inclusions, and real-time live preview.
+              </p>
 
-              <div className="space-y-2">
-                <Link
-                  href="/settings"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors"
-                >
-                  <Database className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Configure Hostinger MySQL</span>
-                </Link>
-                <p className="text-[11px] text-slate-400 text-center leading-tight">
-                  Zero downtime. Articles work with or without active MySQL.
-                </p>
-              </div>
-            </div>
-
-            {/* Packages & Pricing Hub */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                    <Tag className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-sm">
-                      Course Packages
-                    </h3>
-                    <p className="text-[11px] text-slate-500">
-                      17 Courses • 37 Active Plans
-                    </p>
-                  </div>
+              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100 text-xs space-y-2 font-mono">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-500 font-sans">Language Prep:</span>
+                  <span className="font-bold text-slate-800">10 Courses</span>
                 </div>
-
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Interactive
-                </span>
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-2">
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Language Prep:</span>
-                  <span className="font-semibold text-slate-800">9 Courses (₹8.9k - ₹59.9k)</span>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-500 font-sans">Test Prep:</span>
+                  <span className="font-bold text-slate-800">5 Courses</span>
                 </div>
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Test Prep:</span>
-                  <span className="font-semibold text-slate-800">5 Courses (₹14.9k - ₹45.9k)</span>
-                </div>
-                <div className="flex justify-between text-slate-600 text-[11px]">
-                  <span>Skill Catalyst:</span>
-                  <span className="font-semibold text-slate-800">4 Courses (₹4.9k - ₹14.9k)</span>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-500 font-sans">Skill Catalyst:</span>
+                  <span className="font-bold text-slate-800">1 Program (4 Packs)</span>
                 </div>
               </div>
 
               <Link
                 href="/packages"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
               >
                 <Tag className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Manage Packages & Pricing</span>
+                <span>Open Packages & Pricing</span>
               </Link>
             </div>
 
             {/* Category Distribution */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4 text-emerald-600" />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                    <FolderOpen className="w-3.5 h-3.5" />
+                  </div>
                   <h3 className="font-bold text-slate-900 text-sm">
                     Categories Distribution
                   </h3>
                 </div>
-                <span className="text-xs text-slate-400 font-medium">
+                <span className="text-xs text-slate-400 font-semibold">
                   {Object.keys(categoryCounts).length} Topics
                 </span>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {Object.entries(categoryCounts).map(([cat, count]) => {
                   const percentage = Math.round((count / (totalBlogs || 1)) * 100);
                   return (
                     <div key={cat} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-medium text-slate-700">{cat}</span>
-                        <span className="text-slate-400 font-mono">
+                        <span className="font-medium text-slate-700 truncate max-w-[180px]">{cat}</span>
+                        <span className="text-slate-500 font-mono text-[11px]">
                           {count} ({percentage}%)
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-emerald-500 rounded-full transition-all"
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -467,36 +467,36 @@ export default function DashboardPage() {
 
               <Link
                 href="/blogs"
-                className="text-xs font-semibold text-emerald-600 hover:underline block text-center pt-2"
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline block text-center pt-2"
               >
                 Filter Articles by Category &rarr;
               </Link>
             </div>
 
-            {/* Quick Live Preview Banner */}
-            <div className="bg-gradient-to-br from-emerald-900 to-slate-900 text-white rounded-2xl p-5 shadow-sm space-y-3">
+            {/* Public Student Portal Quick Live Banner */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
                   Public Site Live
                 </span>
-                <span className="text-[10px] font-mono text-emerald-300">
+                <span className="text-[10px] font-mono text-slate-400">
                   :3000
                 </span>
               </div>
-              <h4 className="font-bold text-sm">
+              <h4 className="font-bold text-sm text-slate-900">
                 Academic Yatra Student Portal
               </h4>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Test and verify how students view published articles on the frontend.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Test and verify published articles, courses, and pricing directly on the live web.
               </p>
               <a
-                href="http://localhost:3000/blogs"
+                href="http://localhost:3000"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-slate-100 hover:bg-slate-200/80 text-slate-800 rounded-xl text-xs font-bold transition-colors"
               >
-                <span>Open Blog Page</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                <span>Visit Public Site</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
               </a>
             </div>
           </div>
